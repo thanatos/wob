@@ -1,3 +1,12 @@
+import abc as _abc
+
+
+class Rule(object, metaclass=_abc.ABCMeta):
+    @_abc.abstractmethod
+    def matches(self, request):
+        pass
+
+
 class Route(object):
     def __init__(self, rule, endpoint):
         self.rule = rule

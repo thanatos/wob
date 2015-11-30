@@ -7,12 +7,14 @@ import threading as _threading
 
 import six as _6
 
+from . import router as _router
+
 
 REMAINING_COMPONENTS = object()
 _END = object()
 
 
-class PathRule(object):
+class PathRule(_router.Rule):
     def __init__(self, path_component_handlers, prefer_trailing_slash=False):
         self.path_component_handlers = tuple(path_component_handlers)
         for component_handler in self.path_component_handlers[:-1]:
