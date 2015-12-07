@@ -14,7 +14,13 @@ REMAINING_COMPONENTS = object()
 _END = object()
 
 
-class PathRule(_router.Rule):
+class PathMatch(object):
+    def __init__(self, matched_values, remaining):
+        self.matched_values = matched_values
+        self.remaining = remaining
+
+
+class PathRule(object):
     def __init__(self, path_component_handlers, prefer_trailing_slash=False):
         self.path_component_handlers = tuple(path_component_handlers)
         for component_handler in self.path_component_handlers[:-1]:
@@ -28,15 +34,15 @@ class PathRule(_router.Rule):
     def preprocess_path(self, path):
         return path.canonicalize(self.prefer_trailing_slash)
 
-    def match(self, request):
-        """Determines whether this PathRule matches the request.
+    def match(self, path):
+        """Determines whether this PathRule matches the given path.
 
         :returns:
             None, if the rule does not match, otherwise, a dictionary
             containing any matched values from the path.
         """
 
-        path = self.preprocess_path(request.path)
+        path = self.preprocess_path(path)
 
         zipped_path = _it.zip_longest(
             self.path_component_handlers, path,
