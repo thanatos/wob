@@ -17,6 +17,37 @@ class Response(_message.HttpMessage):
         return (self.body,)
 
 
+def new_response(
+        content, mimetype, status_code=200, reason_phrase=None, headers=None):
+
+    if reason_phrase is None:
+        if status_code not in STATUS_TO_REASON_PHRASE:
+            raise AssertionError(
+                '{} is not a status code the library is aware of; if you want'
+                ' to use it, you must also supply the reason_phrase argument'
+                ' to new_response.'.format(status_code)
+            )
+        reason_phrase = STATUS_TO_REASON_PHRASE[status_code]
+    if headers is None:
+        headers = _message.Headers()
+    elif not isinstance(headers, _message.Headers):
+        headers = _message.Headers(headers)
+
+    if mimetype is not None:
+        headers.add_header('Content-Type', mimetype)
+
+    return Response(status_code, reason_phrase, headers, content)
+
+
+def text_response(
+        content, mimetype='text/plain',
+        status_code=200, reason_phrase=None, headers=None):
+
+    body = content.encode('utf-8')
+    mimetype += '; charset=utf-8'
+    return new_response(body, mimetype, status_code, reason_phrase, headers)
+
+
 STATUS_TO_REASON_PHRASE = {
     100: 'Continue',
     101: 'Switching Protocols',
