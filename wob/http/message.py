@@ -1,4 +1,5 @@
 import bisect as _bisect
+import collections as _collections
 
 import six as _6
 
@@ -14,6 +15,13 @@ class Headers(object):
         self._headers = []
         # map header names to indexes in self._headers
         self._name_to_index = {}
+
+        if isinstance(headers, _collections.Mapping):
+            for name, value in _6.iteritems(headers):
+                self.add_header(name, value)
+        else:
+            for name, value in headers:
+                self.add_header(name, value)
 
     def add_header(self, name, value):
         """Add a single header to the list of headers."""
