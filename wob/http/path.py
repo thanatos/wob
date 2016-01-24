@@ -1,5 +1,6 @@
 """Representation of a path in a URL."""
 
+import itertools as _itertools
 import re as _re
 
 
@@ -23,12 +24,6 @@ class Path(object):
             self.text,
         )
 
-    def __iter__(self):
-        slashes_match = _SLASHES.match(self.text)
-        if slashes_match is not None and slashes_match.end() == len(self.text):
-            return iter(('/',))
-        return iter(_SLASHES.split(self.text.strip('/')))
-
     def __eq__(self, other):
         self_canon = self.canonicalize()
         other_canon = other.canonicalize()
@@ -39,6 +34,34 @@ class Path(object):
 
     def __ne__(self, other):
         return not (self == other)
+
+    @property
+    def components(self):
+        """Returns an iterator over the components of the path.
+
+        The returned iterator returns one string for each component (the parts
+        between the "/"s) of the path. The root is represented by the special
+        string ''.
+
+        >>> list(Path('/a/b/c').components)
+        ['', 'a', 'b', 'c']
+        >>> list(Path('/a/b/c/').components)
+        ['', 'a', 'b', 'c']
+        >>> list(Path('/').components)
+        ['']
+
+        :returns: An iterator over the components of the path.
+        """
+        slashes_match = _SLASHES.match(self.text)
+        if slashes_match is not None and slashes_match.end() == len(self.text):
+            # This is a path that represents the root.
+            # e.g, '/', '//', '///', etc.
+            return iter(('',))
+        else:
+            return _itertools.chain(
+                ('',),
+                _SLASHES.split(self.text.strip('/')),
+            )
 
     def canonicalize(self, trailing_slash):
         """Canonicalize a path.

@@ -7,7 +7,7 @@ import threading as _threading
 
 import six as _6
 
-from . import router as _router
+from ..http import path as _path
 
 
 REMAINING_COMPONENTS = object()
@@ -45,7 +45,7 @@ class PathRule(object):
         path = self.preprocess_path(path)
 
         zipped_path = _it.zip_longest(
-            self.path_component_handlers, path,
+            self.path_component_handlers, path.components,
             fillvalue=_END,
         )
 
@@ -113,17 +113,24 @@ def path_rule(input_str, extra_component_handlers={}):
             'A URL path scheme must not contain double slashes.'
         )
 
-    # Remove the leading slash.
-    input_str = input_str[1:]
-
     # If the user passes a trailing slash, assume they prefer that form.
     # Record the preference, then strip it out.
     prefer_trailing_slash = input_str.endswith('/')
     if input_str.endswith('/'):
         input_str = input_str[:-1]
 
+    # If this is the root, return early. We represent the root as an empty
+    # tuple of path component handlers; the split() call below, however,
+    # returns ('',)
+    # Note that input_str is changed above, so "root" here is ''.
+    if input_str == '':
+        return PathRule(('',), prefer_trailing_slash=prefer_trailing_slash)
+
+    # Remove the leading slash.
+    input_str = input_str[1:]
+
     components = input_str.split('/')
-    path_components = []
+    path_components = ['',]
     for component in components:
         if component.startswith('<') and component.endswith('>'):
             component = component[1:-1]
