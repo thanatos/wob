@@ -7,5 +7,5 @@ setup(
     version='0.1',
     description='Python web framework',
     author='Roy Wellington Ⅳ',
-    packages=['wob'],
+    packages=['wob', 'wob.http', 'wob.routing'],
 )
