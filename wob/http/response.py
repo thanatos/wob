@@ -89,6 +89,11 @@ STATUS_TO_REASON_PHRASE = {
 
 
 class HttpError(Exception):
+    def __init__(self, *args):
+        super(HttpError, self).__init__(
+            self.status_code, self.reason_phrase, *args
+        )
+
     def to_response(self):
         body = '{} {}\n'.format(self.status_code, self.reason_phrase)
         body = body.encode('utf-8')
@@ -112,11 +117,24 @@ def _error_class(class_name, status_code):
     )
 
 
+class MethodNotAllowed(HttpError):
+    status_code = 405
+    reason_phrase = STATUS_TO_REASON_PHRASE[405]
+
+    def __init__(self, allow):
+        super(MethodNotAllowed, self).__init__(allow)
+        self.allow = allow
+
+    def to_response(self):
+        response = super(MethodNotAllowed, self).to_response()
+        response.headers.add_header('Allow', ', '.join(sorted(self.allow)))
+        return response
+
+
 BadRequest = _error_class('BadRequest', 400)
 PaymentRequired = _error_class('PaymentRequired', 402)
 Forbidden = _error_class('Forbidden', 403)
 NotFound = _error_class('NotFound', 404)
-MethodNotAllowed = _error_class('MethodNotAllowed', 405)
 NotAcceptable = _error_class('NotAcceptable', 406)
 RequestTimeout = _error_class('RequestTimeout', 408)
 Conflict = _error_class('Conflict', 409)
