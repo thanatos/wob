@@ -3,6 +3,8 @@
 import itertools as _itertools
 import re as _re
 
+import six as _six
+
 
 _SLASHES = _re.compile('/+')
 
@@ -25,9 +27,12 @@ class Path(object):
         )
 
     def __eq__(self, other):
-        self_canon = self.canonicalize()
-        other_canon = other.canonicalize()
-        for self_part, other_part in zip(self_canon, other_canon):
+        self_canon = self.canonicalize(False)
+        other_canon = other.canonicalize(False)
+        zipped_parts = _six.moves.zip_longest(
+            self_canon.components, other_canon.components,
+        )
+        for self_part, other_part in zipped_parts:
             if self_part != other_part:
                 return False
         return True
