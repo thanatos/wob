@@ -14,7 +14,10 @@ class Response(_message.HttpMessage):
             '{} {}'.format(self.status_code, self.reason_phrase),
             list(self.headers),
         )
-        return (self.body,)
+        if isinstance(self.body, bytes):
+            return (self.body,)
+        else:
+            return self.body
 
 
 def new_response(
