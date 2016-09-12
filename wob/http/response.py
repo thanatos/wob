@@ -21,6 +21,12 @@ class Response(_message.HttpMessage):
         else:
             return self.body
 
+    def __repr__(self):
+        return '<{}.{} object at 0x{:x} containing a {} {} response>'.format(
+            __name__, type(self).__name__, id(self),
+            self.status_code, self.reason_phrase,
+        )
+
 
 def new_response(
         content, mimetype, status_code=200, reason_phrase=None, headers=None):
@@ -91,67 +97,3 @@ STATUS_TO_REASON_PHRASE = {
     504: 'Gateway Timeout',
     505: 'HTTP Version Not Supported',
 }
-
-
-class HttpError(Exception):
-    def __init__(self, *args):
-        super(HttpError, self).__init__(
-            self.status_code, self.reason_phrase, *args
-        )
-
-    def to_response(self):
-        body = '{} {}\n'.format(self.status_code, self.reason_phrase)
-        body = body.encode('utf-8')
-        headers = _message.Headers()
-        headers.add_header('Content-Type', 'text/plain; charset=utf-8')
-        return Response(
-            self.status_code,
-            self.reason_phrase,
-            headers,
-            body,
-        )
-
-
-def _error_class(class_name, status_code):
-    return type(
-        class_name, (HttpError,),
-        {
-            'status_code': status_code,
-            'reason_phrase': STATUS_TO_REASON_PHRASE[status_code],
-        },
-    )
-
-
-class MethodNotAllowed(HttpError):
-    status_code = 405
-    reason_phrase = STATUS_TO_REASON_PHRASE[405]
-
-    def __init__(self, allow):
-        super(MethodNotAllowed, self).__init__(allow)
-        self.allow = allow
-
-    def to_response(self):
-        response = super(MethodNotAllowed, self).to_response()
-        response.headers.add_header('Allow', ', '.join(sorted(self.allow)))
-        return response
-
-
-BadRequest = _error_class('BadRequest', 400)
-PaymentRequired = _error_class('PaymentRequired', 402)
-Forbidden = _error_class('Forbidden', 403)
-NotFound = _error_class('NotFound', 404)
-NotAcceptable = _error_class('NotAcceptable', 406)
-RequestTimeout = _error_class('RequestTimeout', 408)
-Conflict = _error_class('Conflict', 409)
-Gone = _error_class('Gone', 410)
-LengthRequired = _error_class('LengthRequired', 411)
-PayloadTooLarge = _error_class('PayloadTooLarge', 413)
-UriTooLong = _error_class('UriTooLong', 414)
-UnsupportedMediaType = _error_class('UnsupportedMediaType', 415)
-ExpectationFailed = _error_class('ExpectationFailed', 417)
-UpgradeRequired = _error_class('UpgradeRequired', 426)
-InternalServerError = _error_class('InternalServerError', 500)
-NotImplemented_ = _error_class('NotImplemented_', 501)
-BadGateway = _error_class('BadGateway', 502)
-ServiceUnavailable = _error_class('ServiceUnavailable', 503)
-GatewayTimeout = _error_class('GatewayTimeout', 504)

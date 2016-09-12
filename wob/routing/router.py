@@ -2,7 +2,7 @@ import abc as _abc
 
 import six as _6
 
-from ..http import response as _response
+from ..http import errors as _errors
 
 
 NO_PATH = object()
@@ -41,17 +41,14 @@ class Router(object):
 
     def route_request(self, request):
         match_result = self.match_request(request)
-        try:
-            if match_result is NO_PATH:
-                raise _response.NotFound()
-            if isinstance(match_result, _NoMethod):
-                allow = set()
-                for methods in match_result.method_handlers:
-                    allow |= methods.methods
-                raise _response.MethodNotAllowed(allow)
-            return match_result.endpoint(request, match_result.match)
-        except _response.HttpError as err:
-            return err.to_response()
+        if match_result is NO_PATH:
+            raise _errors.NotFound()
+        if isinstance(match_result, _NoMethod):
+            allow = set()
+            for methods in match_result.method_handlers:
+                allow |= methods.methods
+            raise _errors.MethodNotAllowed(allow)
+        return match_result.endpoint(request, match_result.match)
 
 
 class Methods(object):
