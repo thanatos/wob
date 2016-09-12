@@ -1,3 +1,5 @@
+import six as _6
+
 from . import message as _message
 
 
@@ -12,7 +14,7 @@ class Response(_message.HttpMessage):
     def return_from_wsgi_app(self, start_response):
         start_response(
             '{} {}'.format(self.status_code, self.reason_phrase),
-            list(self.headers),
+            list(_6.iteritems(self.headers)),
         )
         if isinstance(self.body, bytes):
             return (self.body,)
