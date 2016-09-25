@@ -3,7 +3,7 @@ from . import response as _response
 
 
 class HttpError(Exception):
-    def __init__(self, status_code=None, reason_phrase=None, args=()):
+    def __init__(self, status_code, reason_phrase=None, args=()):
         super(HttpError, self).__init__(*args)
 
         # None means that the subclass is declaring the status code on the
