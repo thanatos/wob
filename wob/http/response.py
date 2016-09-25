@@ -76,6 +76,10 @@ STATUS_TO_REASON_PHRASE = {
     # 306: '(Unused)',
     307: 'Temporary Redirect',
     400: 'Bad Request',
+    # Note: The standard reason-phrase for 401 is "Unauthorized", however, the
+    # code semantically means "Unauthenticated", so we deviate from the typical
+    # wording to provide the correct meaning.
+    401: 'Unauthenticated',
     402: 'Payment Required',
     403: 'Forbidden',
     404: 'Not Found',
