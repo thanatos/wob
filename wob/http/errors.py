@@ -68,14 +68,10 @@ class MethodNotAllowed(HttpError):
         ))
 
 
-class NotFound(HttpError):
-    status_code = 404
-
-
 BadRequest = _error_class('BadRequest', 400)
 PaymentRequired = _error_class('PaymentRequired', 402)
 Forbidden = _error_class('Forbidden', 403)
-# NotFound, 404, above.
+NotFound = _error_class('NotFound', 404)
 # MethodNotAllowed, 405, above.
 NotAcceptable = _error_class('NotAcceptable', 406)
 RequestTimeout = _error_class('RequestTimeout', 408)
