@@ -31,9 +31,6 @@ class PathRule(object):
                 )
         self.prefer_trailing_slash = prefer_trailing_slash
 
-    def preprocess_path(self, path):
-        return path.canonicalize(self.prefer_trailing_slash)
-
     def match(self, path):
         """Determines whether this PathRule matches the given path.
 
@@ -42,7 +39,7 @@ class PathRule(object):
             containing any matched values from the path.
         """
 
-        path = self.preprocess_path(path)
+        path = path.canonicalize()
 
         zipped_path = _it.zip_longest(
             self.path_component_handlers, path.components,
@@ -54,8 +51,6 @@ class PathRule(object):
         for component_handler, component in zipped_path:
             if component_handler is _END:
                 return None
-            elif component is _END:
-                return None
             elif component_handler is REMAINING_COMPONENTS:
 
                 def remaining_components():
@@ -63,8 +58,10 @@ class PathRule(object):
                         yield remaining_component
 
                 remaining = _path.Path('/' + '/'.join(remaining_components()))
-                matched_values['**'] = remaining
+                matched_values['remaining'] = remaining
                 break
+            elif component is _END:
+                return None
             elif isinstance(component_handler, _6.string_types):
                 if component_handler != component:
                     return None

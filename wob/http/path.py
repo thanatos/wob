@@ -27,8 +27,8 @@ class Path(object):
         )
 
     def __eq__(self, other):
-        self_canon = self.canonicalize(False)
-        other_canon = other.canonicalize(False)
+        self_canon = self.canonicalize()
+        other_canon = other.canonicalize()
         zipped_parts = _six.moves.zip_longest(
             self_canon.components, other_canon.components,
         )
@@ -68,7 +68,7 @@ class Path(object):
                 _SLASHES.split(self.text.strip('/')),
             )
 
-    def canonicalize(self, trailing_slash):
+    def canonicalize(self):
         """Canonicalize a path.
 
         This does the following:
@@ -98,9 +98,39 @@ class Path(object):
                 remaining_parts.append(part)
 
         new_path = '/' + '/'.join(remaining_parts)
-        if trailing_slash:
-            new_path += '/'
         return Path(new_path)
+
+    def startswith(self, prefix):
+        zipped_paths = _itertools.zip_longest(
+            self.components,
+            prefix.components,
+        )
+        for our_path, prefix in zipped_paths:
+            if prefix is None:
+                return True
+            if our_path != prefix:
+                return False
+        return True
+
+    def strip_prefix(self, prefix):
+        """Strip a prefix from this Path."""
+        zipped_paths = _itertools.zip_longest(
+            self.components,
+            prefix.components,
+        )
+        new_path = []
+        for our_path, prefix_path in zipped_paths:
+            if prefix_path is None:
+                new_path.append(our_path)
+                new_path.extend(our_path for our_path, _ in zipped_paths)
+                break
+
+            if our_path != prefix_path:
+                raise ValueError('{!r} didn\'t start with prefix {!r}'.format(
+                    self, prefix,
+                ))
+
+        return Path('/' + '/'.join(new_path))
 
 
 class PathNotAbsolute(ValueError):

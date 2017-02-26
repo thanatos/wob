@@ -60,6 +60,13 @@ class Headers(object):
             _, value = self._headers[index]
             yield value
 
+    def copy(self):
+        if _6.PY2:
+            iter_ = self.iteritems()
+        else:
+            iter_ = self.items()
+        return Headers(iter_)
+
     def __getitem__(self, name):
         if name in self:
             return u', '.join(self.get_all_headers(name))
