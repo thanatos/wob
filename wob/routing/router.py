@@ -33,7 +33,7 @@ class Router(object):
             raise _errors.MethodNotAllowed(
                 sorted(match_result.method_handlers)
             )
-        return match_result.endpoint(request, match_result.match)
+        return match_result.endpoint(request, **match_result.match)
 
 
 NO_PATH = object()

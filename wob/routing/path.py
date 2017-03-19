@@ -21,6 +21,8 @@ class PathMatch(object):
 
 
 class PathRule(object):
+    remaining_arg = 'remaining'
+
     def __init__(self, path_component_handlers, prefer_trailing_slash=False):
         self.path_component_handlers = tuple(path_component_handlers)
         for component_handler in self.path_component_handlers[:-1]:
@@ -58,7 +60,7 @@ class PathRule(object):
                         yield remaining_component
 
                 remaining = _path.Path('/' + '/'.join(remaining_components()))
-                matched_values['remaining'] = remaining
+                matched_values[self.remaining_arg] = remaining
                 break
             elif component is _END:
                 return None
