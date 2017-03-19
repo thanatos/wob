@@ -21,6 +21,9 @@ class Router(object):
                 if request.method in method_handlers:
                     endpoint = method_handlers[request.method]
                     return _RouteMatch(endpoint, match)
+                elif ANY_METHOD in method_handlers:
+                    endpoint = method_handlers[ANY_METHOD]
+                    return _RouteMatch(endpoint, match)
                 else:
                     return _NoMethod(match, path_rule, method_handlers)
         return NO_PATH
@@ -37,6 +40,7 @@ class Router(object):
 
 
 NO_PATH = object()
+ANY_METHOD = object()
 
 
 class _NoMethod(object):
